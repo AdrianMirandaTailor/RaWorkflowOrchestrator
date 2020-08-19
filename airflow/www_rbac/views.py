@@ -3911,7 +3911,9 @@ class KeyTabView(AirflowBaseView):
     @has_access
     def download(self, group, filename):  # for downloading the file passed in the filename
         add_to_dir = os.path.join(settings.HADOOP_CONFIGS_FOLDER, *[group])
-        path_file = os.path.join(add_to_dir, filename)
+        keytab_path = os.path.join(add_to_dir, 'keytab/')
+        path_file = os.path.join(keytab_path, filename)
+        print(path_file)
         AirflowBaseView.audit_logging(
             'KeyTabView.download_keytab',
             f'{group}-{filename}',
