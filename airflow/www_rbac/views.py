@@ -3654,6 +3654,7 @@ class SparkConfView(AirflowBaseView):
     # couture-spark config file
     def update_spark_conf(self, group):
         title = "Couture Spark Configuration"
+
         
         config = CP.ConfigParser()
         config.optionxform = str

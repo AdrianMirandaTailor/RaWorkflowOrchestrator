@@ -45,6 +45,7 @@
 <link rel="stylesheet" href="{{url_for_asset('codemirror/addon/merge/merge.css')}}">
 <link rel="stylesheet" href="{{url_for_asset('codemirror/addon/fold/foldgutter.css')}}">
 <link rel="stylesheet" href="{{url_for_asset('codemirror/addon/dialog/dialog.css')}}">
+
 {% endblock %}
 
 {% block head_js %}
@@ -210,6 +211,7 @@
 <script src="{{ url_for_asset('codemirror/addon/selection/active-line.js') }}"></script>
 <script src="{{ url_for_asset('codemirror/keymap/sublime.js') }}"></script>
 <script src="{{ url_for('static', filename='js/language_server.js') }}"></script>
+<script src="{{ url_for('static', filename='js/notify.js') }}"></script>
 <script type="text/javascript">
 
   var diffEditor, snippetEditor, currSnippet;
@@ -373,7 +375,6 @@
   $(document).ready(function () {
 
     var tries = 0;
-
     handleDisconnect = function () {
       // try for every 30 seconds
       every30Seconds = setTimeout(function () {
@@ -384,6 +385,8 @@
 
         ws.addEventListener('close', function (event) {
           if (tries == 0) {
+            window.jQuery = window.$ = jQuery;
+            $.notify("Code analysis and suggestions are currently unavailable. You can still code!", "warn")
             console.log("Language server connection closed, trying to reconnect ...")
           }
           handleDisconnect();
@@ -392,6 +395,8 @@
         ws.addEventListener('open', function (event) {
           tries = 0
           console.log("Language server connected");
+          window.jQuery = window.$ = jQuery;
+          $.notify("Language server is connected! Code analysis and suggestions are available.", "success");
         });
       }, {{ reconnect_interval }});
     }
@@ -400,11 +405,15 @@
   ws = new WebSocket("{{language_server_url}}");
   ws.addEventListener('close', function (event) {
     console.log("Language server connection closed, trying to reconnect ...")
+    window.jQuery = window.$ = jQuery;
+    $.notify("Code analysis and suggestions are currently unavailable. You can still code!", "warn")
     handleDisconnect();
   });
   ws.addEventListener('open', function (event) {
     tries = 0;
     console.log("Language server connected");
+    window.jQuery = window.$ = jQuery;
+    $.notify("Language server is connected! Code analysis and suggestions are available.", "success")
   });
 
   // connect to language server
@@ -452,6 +461,14 @@
   });
 
 
+  $('#addSnippet').on('shown.bs.modal', function (e) {
+    if (!snippetEditor) {
+      var snipArea = document.getElementById('snippetInput');
+      snippetEditor = CodeMirror.fromTextArea(snipArea, editorConfigs);
+    }
+  })
+
+
   // WARNING: DO NOT TOUCH.
   // this method adds and removes classes based on which tab is active.
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -483,7 +500,7 @@
     }
   });
 
-  $("#codebrickSearch").on("keyup", function () {
+   $("#codebrickSearch").on("keyup", function () {
     var value = $(this).val().toLowerCase();
     $("#codebrickList a").filter(function () {
       $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
