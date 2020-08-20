@@ -265,6 +265,7 @@ def configure_vars():
     pytorch_model_server_host = conf.get('modelservers', 'pytorch_model_server_host')
     pytorch_model_server_management_port = conf.get('modelservers', 'pytorch_model_server_management_port')
     PYTORCH_MANAGEMENT_URL = f'http://{pytorch_model_server_host}:{pytorch_model_server_management_port}'
+    LANGUAGE_SERVER_URL = conf.get('langserver', 'langserver_url')
 
     PLUGINS_FOLDER = conf.get(
         'core',
